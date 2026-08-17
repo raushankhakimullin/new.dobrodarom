@@ -22,25 +22,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Diagnostics
-        working-directory: artifacts/dobro-darom
-        continue-on-error: true
-        run: |
-          echo "=== node version ===" && node --version
-          echo "=== vite binary ===" && ls -la node_modules/.bin/vite || echo "MISSING"
-          echo "=== vite version ===" && node_modules/.bin/vite --version || echo "FAILED"
-          echo "=== @workspace/api-client-react ===" && ls node_modules/@workspace/api-client-react 2>/dev/null || echo "NOT LINKED"
-          echo "=== replit plugins ===" && ls node_modules/@replit 2>/dev/null || echo "NOT FOUND"
+        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
         working-directory: artifacts/dobro-darom
-        run: |
-          node_modules/.bin/vite build --config vite.config.ts 2>&1
+        run: node_modules/.bin/vite build --config vite.config.ts
         env:
           NODE_ENV: production
           PORT: '3000'
