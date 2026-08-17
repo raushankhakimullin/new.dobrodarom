@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Добро Даром — Благотворительный Фонд</title>
+    <meta name="description" content="Добро Даром — Благотворительный Фонд — built on Replit. Update this description to reflect the app." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="Добро Даром — Благотворительный Фонд" />
+    <meta property="og:description" content="Добро Даром — Благотворительный Фонд — built on Replit. Update this description to reflect the app." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Добро Даром — Благотворительный Фонд" />
+    <meta name="twitter:description" content="Добро Даром — Благотворительный Фонд — built on Replit. Update this description to reflect the app." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-ChRsDqgf.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CA8PMkeA.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  <!-- ==== Виджет пожертвования CloudPayments — вставлено ассистентом 13.08.2026 ==== -->
+<div id="cp-donate-root">
+  <button type="button" id="cp-donate-fab">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="5" width="20" height="14" rx="2" stroke="white" stroke-width="2"/><path d="M2 9H22" stroke="white" stroke-width="2"/></svg>
+    Пожертвовать картой
+  </button>
+
+  <div id="cp-donate-overlay">
+    <div id="cp-donate-modal" role="dialog" aria-modal="true" aria-label="Пожертвование картой">
+      <button type="button" id="cp-donate-close" aria-label="Закрыть">&times;</button>
+      <p id="cp-donate-title">Поддержать «Добро Даром»</p>
+
+      <div id="cp-donate-presets">
+        <button type="button" class="cp-preset" data-amount="500">500 ₽</button>
+        <button type="button" class="cp-preset" data-amount="1000">1000 ₽</button>
+        <button type="button" class="cp-preset" data-amount="3000">3000 ₽</button>
+      </div>
+
+      <label for="cp-donate-amount">Сумма, ₽</label>
+      <input type="number" id="cp-donate-amount" min="1" step="1" placeholder="Введите сумму" />
+
+      <label id="cp-donate-recurrent-label">
+        <input type="checkbox" id="cp-donate-recurrent" />
+        Сделать пожертвование ежемесячным
+      </label>
+
+      <button type="button" id="cp-donate-pay">Оплатить картой</button>
+      <p id="cp-donate-status"></p>
+      <p id="cp-donate-note">Оплата проходит через защищённый виджет CloudPayments. Мы не получаем и не храним данные вашей карты.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  #cp-donate-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: #C1495A;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(193, 73, 90, 0.4);
+  }
+  #cp-donate-fab:hover { background: #A93D4C; }
+
+  #cp-donate-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 15, 16, 0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #cp-donate-overlay.cp-donate-open { display: flex; }
+
+  #cp-donate-modal {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 24px 24px;
+    font-family: 'Inter', Arial, sans-serif;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  #cp-donate-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: #888;
+    cursor: pointer;
+  }
+  #cp-donate-title {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+  }
+  #cp-donate-presets {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .cp-preset {
+    flex: 1;
+    padding: 9px 4px;
+    border: 1px solid #e0d3d5;
+    border-radius: 8px;
+    background: #FBF3F4;
+    color: #333;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .cp-preset.cp-preset-active {
+    background: #C1495A;
+    border-color: #C1495A;
+    color: #fff;
+  }
+  #cp-donate-modal label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  #cp-donate-amount {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Inter', Arial, sans-serif;
+  }
+  #cp-donate-recurrent-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+  }
+  #cp-donate-recurrent-label input { margin: 0; width: 16px; height: 16px; }
+  #cp-donate-pay {
+    width: 100%;
+    padding: 13px;
+    background: #C1495A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Inter', Arial, sans-serif;
+    cursor: pointer;
+  }
+  #cp-donate-pay:hover { background: #A93D4C; }
+  #cp-donate-status {
+    min-height: 18px;
+    margin: 10px 0 0;
+    font-size: 13px;
+    text-align: center;
+  }
+  #cp-donate-note {
+    margin: 10px 0 0;
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    line-height: 1.4;
+  }
+  #cp-donate-inline-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    background: #C1495A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', Arial, sans-serif;
+    cursor: pointer;
+  }
+  #cp-donate-inline-btn:hover { background: #A93D4C; }
+</style>
+
+<script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"></script>
+<script>
+(function () {
+  var CP_PUBLIC_ID = 'pk_29304e270934045c05a006a4e38a0';
+
+  var overlay = document.getElementById('cp-donate-overlay');
+  var fab = document.getElementById('cp-donate-fab');
+  var closeBtn = document.getElementById('cp-donate-close');
+  var amountInput = document.getElementById('cp-donate-amount');
+  var payBtn = document.getElementById('cp-donate-pay');
+  var statusEl = document.getElementById('cp-donate-status');
+  var recurrentCheckbox = document.getElementById('cp-donate-recurrent');
+  var presets = document.querySelectorAll('.cp-preset');
+
+  function openModal() {
+    overlay.classList.add('cp-donate-open');
+    statusEl.textContent = '';
+    statusEl.style.color = '';
+  }
+  function closeModal() {
+    overlay.classList.remove('cp-donate-open');
+  }
+
+  fab.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  presets.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      amountInput.value = btn.getAttribute('data-amount');
+      presets.forEach(function (b) { b.classList.remove('cp-preset-active'); });
+      btn.classList.add('cp-preset-active');
+    });
+  });
+  amountInput.addEventListener('input', function () {
+    presets.forEach(function (b) { b.classList.remove('cp-preset-active'); });
+  });
+
+  payBtn.addEventListener('click', function () {
+    var amount = parseFloat(amountInput.value);
+    if (!amount || amount <= 0) {
+      statusEl.textContent = 'Пожалуйста, укажите сумму пожертвования.';
+      statusEl.style.color = '#c0392b';
+      amountInput.focus();
+      return;
+    }
+
+    var isRecurrent = recurrentCheckbox.checked;
+    statusEl.textContent = '';
+
+    var payload = {
+      publicId: CP_PUBLIC_ID,
+      description: isRecurrent
+        ? 'Ежемесячное пожертвование в благотворительный фонд «Добро Даром»'
+        : 'Пожертвование в благотворительный фонд «Добро Даром»',
+      amount: amount,
+      currency: 'RUB',
+      skin: 'modern',
+      data: { source: 'dobrodarom.ru — плавающая кнопка' }
+    };
+
+    if (isRecurrent) {
+      payload.data.CloudPayments = {
+        recurrent: {
+          interval: 'Month',
+          period: 1
+        }
+      };
+    }
+
+    var widget = new cp.CloudPayments();
+    widget.pay('charge', payload, {
+      onSuccess: function () {
+        statusEl.textContent = isRecurrent
+          ? 'Спасибо! Первый платёж проведён, подписка на ежемесячную поддержку оформлена.'
+          : 'Спасибо за вашу поддержку! Платёж успешно проведён.';
+        statusEl.style.color = '#2b8a3e';
+      },
+      onFail: function (reason) {
+        statusEl.textContent = 'Платёж не завершён: ' + (reason || 'попробуйте ещё раз.');
+        statusEl.style.color = '#c0392b';
+      }
+    });
+  });
+
+  function tryInsertInlineButton() {
+    if (document.getElementById('cp-donate-inline-btn')) return;
+    var buttons = document.querySelectorAll('button');
+    for (var i = 0; i < buttons.length; i++) {
+      if (buttons[i].textContent.trim() === 'Скопировать реквизиты') {
+        var inlineBtn = document.createElement('button');
+        inlineBtn.type = 'button';
+        inlineBtn.id = 'cp-donate-inline-btn';
+        inlineBtn.textContent = 'Оплатить картой онлайн';
+        inlineBtn.addEventListener('click', openModal);
+        buttons[i].parentNode.insertBefore(inlineBtn, buttons[i].nextSibling);
+        return;
+      }
+    }
+  }
+  tryInsertInlineButton();
+  var cpObserver = new MutationObserver(tryInsertInlineButton);
+  cpObserver.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<!-- ==== /Виджет пожертвования CloudPayments ==== -->
+<!-- ==== Лента пожертвований (Leyka-style) на странице /reports — вставлено ассистентом 13.08.2026 ==== -->
+<script>
+(function () {
+  function formatDateRu(iso) {
+    try {
+      var d = new Date(iso);
+      var months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+      return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    } catch (e) { return iso; }
+  }
+
+  function renderFeed(list, donations) {
+    if (!donations || !donations.length) {
+      list.innerHTML = '<p style="color:#888;font-size:14px;text-align:center;padding:24px 0;">Пока нет пожертвований через сайт. Станьте первым, кто поддержит фонд онлайн!</p>';
+      return;
+    }
+    var sorted = donations.slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+    var html = sorted.slice(0, 20).map(function (d) {
+      var amountNum = Math.round(Number(d.amount) || 0);
+      var amountText = amountNum.toLocaleString('ru-RU') + ' ' + (d.currency === 'RUB' ? '₽' : (d.currency || ''));
+      var badge = d.recurrent
+        ? '<span style="display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:#FBF3F4;color:#C1495A;font-size:11px;font-weight:600;vertical-align:middle;">ежемесячно</span>'
+        : '';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eee;">' +
+        '<div>' +
+          '<div style="font-weight:600;color:#222;font-size:15px;">Пожертвование ' + amountText + badge + '</div>' +
+          '<div style="font-size:13px;color:#999;margin-top:2px;">' + formatDateRu(d.date) + '</div>' +
+        '</div>' +
+        '<span style="color:#C1495A;font-size:18px;">&#10084;</span>' +
+      '</div>';
+    }).join('');
+    list.innerHTML = html;
+  }
+
+  function loadFeed(list) {
+    fetch('/leyka/donations_public.json', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (data) { renderFeed(list, data); })
+      .catch(function () { renderFeed(list, []); });
+  }
+
+  function tryInsertReportsFeed() {
+    if (location.pathname.replace(/\/$/, '') !== '/reports') return;
+    var existingCard = document.getElementById('cp-donations-feed');
+    if (existingCard) {
+      var existingList = document.getElementById('cp-feed-list');
+      if (existingList) loadFeed(existingList);
+      return;
+    }
+    var headings = Array.prototype.slice.call(document.querySelectorAll('h2'));
+    var archiveHeading = null;
+    for (var i = 0; i < headings.length; i++) {
+      if (headings[i].textContent.trim() === 'Архив годовых отчетов') { archiveHeading = headings[i]; break; }
+    }
+    if (!archiveHeading) return;
+    var archiveBlock = archiveHeading.closest('.max-w-4xl.mx-auto') || archiveHeading.parentElement;
+    var container = archiveBlock ? archiveBlock.parentElement : null;
+    if (!container) return;
+
+    var card = document.createElement('div');
+    card.id = 'cp-donations-feed';
+    card.className = 'bg-white border border-border shadow-sm rounded-3xl p-8 md:p-12 mb-16 max-w-4xl mx-auto';
+    card.innerHTML =
+      '<h2 class="text-3xl font-serif font-bold mb-2">Лента пожертвований</h2>' +
+      '<p class="text-muted-foreground mb-6">Пожертвования, сделанные через сайт онлайн, — список обновляется автоматически.</p>' +
+      '<div id="cp-feed-list"></div>';
+
+    container.insertBefore(card, archiveBlock);
+    loadFeed(card.querySelector('#cp-feed-list'));
+  }
+
+  tryInsertReportsFeed();
+  var cpReportsObserver = new MutationObserver(tryInsertReportsFeed);
+  cpReportsObserver.observe(document.body, { childList: true, subtree: true });
+
+  setInterval(function () {
+    var list = document.getElementById('cp-feed-list');
+    if (list) loadFeed(list);
+  }, 60000);
+})();
+</script>
+
+<script>
+(function () {
+  function tryInsertEventsNavLink() {
+    var ul = document.querySelector('nav ul.flex.items-center.gap-1');
+    if (!ul) return;
+    var existing = ul.querySelector('a[href="/events"]');
+    if (existing) return;
+    var lastLi = ul.querySelector('li:last-child');
+    if (!lastLi) return;
+    var newLi = lastLi.cloneNode(true);
+    var a = newLi.querySelector('a');
+    if (!a) return;
+    a.setAttribute('href', '/events');
+    a.textContent = 'Что у нас происходило';
+    ul.appendChild(newLi);
+  }
+  tryInsertEventsNavLink();
+  var cpEventsNavObserver = new MutationObserver(tryInsertEventsNavLink);
+  cpEventsNavObserver.observe(document.body, { childList: true, subtree: true });
+
+  function isEventsPath() {
+    var p = location.pathname;
+    return p === '/events' || p === '/events/';
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  function renderEventsList(container, events) {
+    if (!events || !events.length) {
+      container.innerHTML = '<p style="color:#6b7280;text-align:center;padding:40px 0;">Пока нет опубликованных материалов.</p>';
+      return;
+    }
+    var byYear = {};
+    events.forEach(function (ev) {
+      var year = (ev.date || '').substring(0, 4) || 'Без даты';
+      if (!byYear[year]) byYear[year] = [];
+      byYear[year].push(ev);
+    });
+    var years = Object.keys(byYear).sort(function (a, b) { return b.localeCompare(a); });
+    var html = '';
+    years.forEach(function (year) {
+      html += '<h3 class="text-2xl font-serif font-bold mb-6 mt-12 text-gray-900">' + year + '</h3>';
+      html += '<div class="flex flex-col gap-6">';
+      byYear[year].sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); }).forEach(function (ev) {
+        var dateStr = ev.date;
+        try {
+          var d = new Date(ev.date + 'T00:00:00');
+          dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+        } catch (e) {}
+        var sourceLabel = ev.source === 'vk' ? 'ВКонтакте' : (ev.source === 'telegram' ? 'Telegram' : 'ВКонтакте и Telegram');
+        html += '<div class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 md:p-8">' +
+          '<div class="flex items-center gap-3 mb-3 flex-wrap">' +
+          '<span class="text-sm font-semibold" style="color:#b91c3c;">' + escapeHtml(dateStr) + '</span>' +
+          '<span class="text-xs text-gray-400">&bull;</span>' +
+          '<span class="text-xs text-gray-500">' + escapeHtml(sourceLabel) + '</span>' +
+          '</div>' +
+          '<h4 class="text-lg font-serif font-bold mb-2 text-gray-900">' + escapeHtml(ev.title) + '</h4>' +
+          '<p class="text-gray-600 leading-relaxed">' + escapeHtml(ev.text) + '</p>' +
+          (ev.url ? '<a href="' + ev.url + '" target="_blank" rel="noopener" class="inline-block mt-4 text-sm font-semibold hover:underline" style="color:#b91c3c;">Смотреть публикацию &rarr;</a>' : '') +
+          '</div>';
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function loadEventsList(container) {
+    container.innerHTML = '<p style="color:#9ca3af;">Загрузка...</p>';
+    fetch('/leyka/events_public.json', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (data) { renderEventsList(container, data); })
+      .catch(function () { renderEventsList(container, []); });
+  }
+
+  function buildEventsPage() {
+    if (!isEventsPath()) return;
+    if (document.getElementById('cp-events-page')) return;
+    var root = document.getElementById('root');
+    if (root) root.style.display = 'none';
+    document.title = 'Что у нас происходило — Добро Даром';
+
+    var page = document.createElement('div');
+    page.id = 'cp-events-page';
+    page.innerHTML =
+      '<nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 shadow-sm border-b border-gray-100" style="backdrop-filter:blur(6px);">' +
+        '<div class="container mx-auto px-4 md:px-6">' +
+          '<div class="flex items-center justify-between h-16 md:h-[72px]">' +
+            '<a href="/" class="flex items-center gap-2.5 shrink-0" style="text-decoration:none;">' +
+              '<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9999px;background:#b91c3c;color:#fff;font-size:16px;">&hearts;</span>' +
+              '<span style="display:flex;flex-direction:column;line-height:1.1;">' +
+                '<span class="font-serif font-bold text-[18px] md:text-[19px]" style="color:#111827;">Добро Даром</span>' +
+                '<span style="font-size:9px;letter-spacing:0.08em;color:#6b7280;">БЛАГОТВОРИТЕЛЬНЫЙ ФОНД</span>' +
+              '</span>' +
+            '</a>' +
+            '<div class="hidden lg:flex items-center gap-7 xl:gap-8">' +
+              '<ul class="flex items-center gap-1" style="list-style:none;">' +
+                '<li><a href="/" style="padding:8px 14px;display:inline-block;color:#374151;text-decoration:none;">Главная</a></li>' +
+                '<li><a href="/about" style="padding:8px 14px;display:inline-block;color:#374151;text-decoration:none;">О фонде</a></li>' +
+                '<li><a href="/programs" style="padding:8px 14px;display:inline-block;color:#374151;text-decoration:none;">Программы</a></li>' +
+                '<li><a href="/help" style="padding:8px 14px;display:inline-block;color:#374151;text-decoration:none;">Как помочь</a></li>' +
+                '<li><a href="/reports" style="padding:8px 14px;display:inline-block;color:#374151;text-decoration:none;">Отчётность</a></li>' +
+                '<li><a href="/contact" style="padding:8px 14px;display:inline-block;color:#374151;text-decoration:none;">Контакты</a></li>' +
+                '<li><a href="/events" style="padding:8px 14px;display:inline-block;color:#b91c3c;font-weight:600;text-decoration:none;">Что у нас происходило</a></li>' +
+              '</ul>' +
+              '<a href="/help" class="shrink-0 inline-flex items-center justify-center rounded-full px-5 py-2 text-[13.5px] font-semibold whitespace-nowrap transition-all duration-200 bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow-md hover:-translate-y-px">Помочь сейчас</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</nav>' +
+      '<main class="pt-28 pb-20 bg-background" style="min-height:100vh;">' +
+        '<div class="container mx-auto px-4 md:px-6 max-w-4xl">' +
+          '<h1 class="text-3xl md:text-4xl font-serif font-bold mb-3 text-gray-900">Что у нас происходило</h1>' +
+          '<p class="text-gray-600 mb-10">Хроника мероприятий и новостей фонда «Добро Даром» — из наших страниц ВКонтакте и Telegram.</p>' +
+          '<div id="cp-events-list"></div>' +
+        '</div>' +
+      '</main>' +
+      '<footer class="pt-10 pb-8" style="background:#0a0a0f;color:#fff;text-align:center;">' +
+        '<p style="font-weight:600;">Благотворительный фонд «Добро Даром»</p>' +
+        '<p style="opacity:0.6;font-size:13px;margin-top:8px;">Telegram: @gooddarom &middot; ВКонтакте: vk.ru/fund.dobrodarom</p>' +
+      '</footer>';
+    document.body.appendChild(page);
+
+    loadEventsList(document.getElementById('cp-events-list'));
+  }
+
+  buildEventsPage();
+  var cpEventsPageObserver = new MutationObserver(buildEventsPage);
+  cpEventsPageObserver.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<!-- ==== /Лента пожертвований ==== -->
+<!-- ==== Логотип: горизонтальная версия ==== -->
+<script>
+    (function() {
+      var LOGO_SRC = '/assets/dobrodarom-logo-horizontal.svg';
+        function applyLogo() {
+            var el = document.querySelector('div.flex.items-center.gap-2\\.5.cursor-pointer.group.shrink-0.select-none');
+                if (el && el.getAttribute('data-logo-replaced') !== 'true') {
+                      el.innerHTML = '<img src="' + LOGO_SRC + '" alt="Добро Даром — Благотворительный фонд" style="height:40px;width:auto;display:block;" />';
+                            el.setAttribute('data-logo-replaced', 'true');
+                                }
+                                  }
+                                    applyLogo();
+                                      var navEl = document.querySelector('nav') || document.body;
+                                        var logoObserver = new MutationObserver(function() { applyLogo(); });
+                                          logoObserver.observe(navEl, { childList: true, subtree: true });
+                                          })();
+                                          </script>
+                                          
+</script>
+</body>
+</html>
