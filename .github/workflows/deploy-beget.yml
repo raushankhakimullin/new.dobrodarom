@@ -23,10 +23,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build frontend
         run: PORT=3000 BASE_PATH=/ pnpm --filter @workspace/dobro-darom run build
@@ -84,3 +83,4 @@ jobs:
       - name: Cleanup SSH key
         if: always()
         run: rm -f ~/.ssh/deploy_key
+
