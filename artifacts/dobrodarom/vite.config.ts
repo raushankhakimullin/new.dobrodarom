@@ -72,6 +72,7 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    historyApiFallback: true,
     proxy: {
       // Proxy /leyka/* to the live dobrodarom.ru site so that events_public.json
       // and donations_public.json are served without CORS issues in development
