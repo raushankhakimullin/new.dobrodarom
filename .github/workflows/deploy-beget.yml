@@ -19,21 +19,25 @@ jobs:
         with:
           version: 10
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build frontend
+        working-directory: artifacts/dobro-darom
         run: |
           set -euo pipefail
-          PORT=3000 BASE_PATH=/ pnpm --filter @workspace/dobro-darom run build 2>&1
+          echo "Node: $(node --version)  pnpm: $(pnpm --version)"
+          node_modules/.bin/vite build --config vite.config.ts
         env:
           NODE_ENV: production
+          PORT: '3000'
+          BASE_PATH: '/'
 
       - name: Create .htaccess in dist
         run: |
