@@ -27,12 +27,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Diagnostics
+        working-directory: artifacts/dobro-darom
+        continue-on-error: true
+        run: |
+          echo "=== node version ===" && node --version
+          echo "=== vite binary ===" && ls -la node_modules/.bin/vite || echo "MISSING"
+          echo "=== vite version ===" && node_modules/.bin/vite --version || echo "FAILED"
+          echo "=== @workspace/api-client-react ===" && ls node_modules/@workspace/api-client-react 2>/dev/null || echo "NOT LINKED"
+          echo "=== replit plugins ===" && ls node_modules/@replit 2>/dev/null || echo "NOT FOUND"
+
       - name: Build frontend
         working-directory: artifacts/dobro-darom
         run: |
-          set -euo pipefail
-          echo "Node: $(node --version)  pnpm: $(pnpm --version)"
-          node_modules/.bin/vite build --config vite.config.ts
+          node_modules/.bin/vite build --config vite.config.ts 2>&1
         env:
           NODE_ENV: production
           PORT: '3000'
