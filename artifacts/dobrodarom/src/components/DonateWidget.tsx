@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Heart, X, CreditCard } from "lucide-react";
+import { Heart, X } from "lucide-react";
 
 declare global {
   interface Window {
@@ -133,10 +133,10 @@ export function DonateWidget() {
         onClick={() => setOpen(true)}
         className="fixed right-5 bottom-5 z-[9998] flex items-center gap-2 rounded-full px-5 py-3.5 font-semibold text-[15px] text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
         style={{ background: "#C1495A", boxShadow: "0 6px 20px rgba(193,73,90,0.4)" }}
-        aria-label="Пожертвовать картой"
+        aria-label="Стань Хранителем добра"
       >
-        <CreditCard className="w-5 h-5 shrink-0" />
-        Пожертвовать картой
+        <Heart className="w-5 h-5 shrink-0 fill-white" />
+        Стань Хранителем добра
       </button>
 
       {/* Overlay */}
