@@ -1,0 +1,20 @@
+[
+    {
+        "date": "2026-08-14T20:52:19+03:00",
+        "amount": 600,
+        "currency": "RUB",
+        "recurrent": false
+    },
+    {
+        "date": "2026-08-14T15:02:14+03:00",
+        "amount": 500,
+        "currency": "RUB",
+        "recurrent": true
+    },
+    {
+        "date": "2026-08-13T17:47:31+03:00",
+        "amount": 10,
+        "currency": "RUB",
+        "recurrent": false
+    }
+]
