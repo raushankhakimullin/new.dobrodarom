@@ -9,86 +9,30 @@ export interface HealthStatus {
   status: string;
 }
 
-export interface ContactRequest {
-  /**
-     * @minLength 1
-     * @maxLength 200
-     */
-  name: string;
-  /** @maxLength 320 */
-  email: string;
-  /** @maxLength 50 */
-  phone?: string;
-  /** @maxLength 300 */
-  subject?: string;
-  /**
-     * @minLength 1
-     * @maxLength 5000
-     */
-  message: string;
-}
-
-export interface ContactSubmission {
-  id: number;
-  name: string;
-  email: string;
-  /** @nullable */
-  phone?: string | null;
-  /** @nullable */
-  subject?: string | null;
-  message: string;
-  createdAt: string;
-}
-
-export type DonationRequestInputFrequency = typeof DonationRequestInputFrequency[keyof typeof DonationRequestInputFrequency];
+export type DonationType = typeof DonationType[keyof typeof DonationType];
 
 
-export const DonationRequestInputFrequency = {
-  one_time: 'one_time',
+export const DonationType = {
+  once: 'once',
   monthly: 'monthly',
 } as const;
 
-export interface DonationRequestInput {
-  /**
-     * @minLength 1
-     * @maxLength 200
-     */
-  name: string;
-  /** @maxLength 320 */
-  email: string;
-  /** @maxLength 50 */
-  phone?: string;
-  /**
-     * Donation amount in rubles
-     * @minimum 1
-     * @maximum 100000000
-     */
-  amount: number;
-  frequency?: DonationRequestInputFrequency;
-  /** @maxLength 2000 */
-  comment?: string;
-}
-
-export interface DonationRequest {
+export interface Donation {
   id: number;
-  name: string;
-  email: string;
-  /** @nullable */
-  phone?: string | null;
+  /** Amount in full rubles */
   amount: number;
-  frequency: string;
-  /** @nullable */
-  comment?: string | null;
+  /** Pre-anonymised donor display name (never raw PII) */
+  donorName: string;
+  project: string;
+  type: DonationType;
   createdAt: string;
 }
 
-export type ValidationErrorDetailsItem = {
-  path: string;
-  message: string;
+export type ListDonationsParams = {
+/**
+ * @minimum 1
+ * @maximum 50
+ */
+limit?: number;
 };
-
-export interface ValidationError {
-  error: string;
-  details?: ValidationErrorDetailsItem[];
-}
 
