@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Heart, MapPin, Phone, Mail, ArrowRight } from "lucide-react";
+import { LogoMark } from "./Logo";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,10 +13,10 @@ export function Footer() {
           {/* Column 1: Brand & Mission */}
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white font-serif font-bold text-xl tracking-tighter">ДД</span>
+              <div className="shrink-0 flex items-center justify-center">
+                <LogoMark variant="white-on-red" size={48} />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col justify-center">
                 <span className="font-serif font-bold text-lg leading-tight tracking-wide text-white">Добро Даром</span>
                 <span className="text-xs text-gray-400">Благотворительный фонд</span>
               </div>
