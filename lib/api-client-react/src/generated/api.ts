@@ -6,30 +6,23 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
-  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
-  MutationFunction,
   QueryFunction,
   QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
-  ContactRequest,
-  ContactSubmission,
-  DonationRequest,
-  DonationRequestInput,
+  Donation,
   HealthStatus,
-  ValidationError
+  ListDonationsParams
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
-import type { ErrorType , BodyType } from '../custom-fetch';
+import type { ErrorType } from '../custom-fetch';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -133,26 +126,33 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
-export const getSubmitContactUrl = () => {
+export const getListDonationsUrl = (params?: ListDonationsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/contact`
+  return stringifiedParams.length > 0 ? `/api/donations?${stringifiedParams}` : `/api/donations`
 }
 
 /**
- * Stores a contact form submission
- * @summary Submit a contact form
+ * Returns the last N successful donations for the public feed. Donor email is never included; donorName is pre-anonymised server-side.
+ * @summary List recent public donations
  */
-export const submitContact = async (contactRequest: ContactRequest, options?: Parameters<typeof customFetch>[1]): Promise<ContactSubmission> => {
+export const listDonations = async (params?: ListDonationsParams, options?: Parameters<typeof customFetch>[1]): Promise<Donation[]> => {
 
-  return customFetch<ContactSubmission>(getSubmitContactUrl(),
+  return customFetch<Donation[]>(getListDonationsUrl(params),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(contactRequest)
+    method: 'GET'
+
+
   }
 );}
 
@@ -160,120 +160,54 @@ export const submitContact = async (contactRequest: ContactRequest, options?: Pa
 
 
 
-export const getSubmitContactMutationOptions = <TError = ErrorType<ValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitContact>>, TError,{data: BodyType<ContactRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof submitContact>>, TError,{data: BodyType<ContactRequest>}, TContext> => {
-
-const mutationKey = ['submitContact'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitContact>>, {data: BodyType<ContactRequest>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  submitContact(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SubmitContactMutationResult = NonNullable<Awaited<ReturnType<typeof submitContact>>>
-    export type SubmitContactMutationBody = BodyType<ContactRequest>
-    export type SubmitContactMutationError = ErrorType<ValidationError>
-
-    /**
- * @summary Submit a contact form
- */
-export const useSubmitContact = <TError = ErrorType<ValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitContact>>, TError,{data: BodyType<ContactRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof submitContact>>,
-        TError,
-        {data: BodyType<ContactRequest>},
-        TContext
-      > => {
-      return useMutation(getSubmitContactMutationOptions(options));
+export const getListDonationsQueryKey = (params?: ListDonationsParams,) => {
+    return [
+    `/api/donations`, ...(params ? [params] : [])
+    ] as const;
     }
 
-export const getSubmitDonationRequestUrl = () => {
+
+export const getListDonationsQueryOptions = <TData = Awaited<ReturnType<typeof listDonations>>, TError = ErrorType<unknown>>(params?: ListDonationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDonations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDonationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDonations>>> = ({ signal }) => listDonations(params, { signal, ...requestOptions });
 
 
 
 
-  return `/api/donations`
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDonations>>, TError, TData> & { queryKey: QueryKey }
 }
 
+export type ListDonationsQueryResult = NonNullable<Awaited<ReturnType<typeof listDonations>>>
+export type ListDonationsQueryError = ErrorType<unknown>
+
+
 /**
- * Stores a donation request (pledge/intent)
- * @summary Submit a donation request
+ * @summary List recent public donations
  */
-export const submitDonationRequest = async (donationRequestInput: DonationRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<DonationRequest> => {
 
-  return customFetch<DonationRequest>(getSubmitDonationRequestUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(donationRequestInput)
-  }
-);}
+export function useListDonations<TData = Awaited<ReturnType<typeof listDonations>>, TError = ErrorType<unknown>>(
+ params?: ListDonationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDonations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
+  const queryOptions = getListDonationsQueryOptions(params,options)
 
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
-
-export const getSubmitDonationRequestMutationOptions = <TError = ErrorType<ValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitDonationRequest>>, TError,{data: BodyType<DonationRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof submitDonationRequest>>, TError,{data: BodyType<DonationRequestInput>}, TContext> => {
-
-const mutationKey = ['submitDonationRequest'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitDonationRequest>>, {data: BodyType<DonationRequestInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  submitDonationRequest(data,requestOptions)
-        }
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 
 
 
 
 
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SubmitDonationRequestMutationResult = NonNullable<Awaited<ReturnType<typeof submitDonationRequest>>>
-    export type SubmitDonationRequestMutationBody = BodyType<DonationRequestInput>
-    export type SubmitDonationRequestMutationError = ErrorType<ValidationError>
-
-    /**
- * @summary Submit a donation request
- */
-export const useSubmitDonationRequest = <TError = ErrorType<ValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitDonationRequest>>, TError,{data: BodyType<DonationRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof submitDonationRequest>>,
-        TError,
-        {data: BodyType<DonationRequestInput>},
-        TContext
-      > => {
-      return useMutation(getSubmitDonationRequestMutationOptions(options));
-    }
 
