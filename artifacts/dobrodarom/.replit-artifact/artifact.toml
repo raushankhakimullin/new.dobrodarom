@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Добро Даром — Благотворительный Фонд"
+description = "Многостраничный сайт благотворительного фонда 'Добро Даром' (Казань). Помогает мамам с детьми в кризисе, малообеспеченным семьям, одиноким пенсионерам. Сайт вызывает максимальное доверие через прозрачность, истории подопечных и подробное описание программ."
+version = "1.0.0"
+id = "artifacts/dobrodarom"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25881
+
+[services.development]
+run = "pnpm --filter @workspace/dobrodarom run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dobrodarom", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/dobrodarom/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25881"
+BASE_PATH = "/"

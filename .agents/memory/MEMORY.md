@@ -1,0 +1,2 @@
+- [Dobrodarom project](dobrodarom-project.md) — CloudPayments, Events/VK/TG feeds, GitHub push details
+- [Orval zod codegen quirk](orval-zod-codegen.md) — orval emits zod v4 syntax; codegen rewrites imports to zod/v4, don't remove that step

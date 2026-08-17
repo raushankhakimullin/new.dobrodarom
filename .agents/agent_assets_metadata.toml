@@ -1,0 +1,9 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "1UFCHmXF8ik1Uf9I-3Ju2"
+uri = "file://dobrodarom-site.zip"
+type = "unspecified"
+title = "dobrodarom-site.zip"
+description = "Обновлённый сайт с исправленными кнопками на мобильном"
