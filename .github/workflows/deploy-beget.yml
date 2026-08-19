@@ -1,0 +1,109 @@
+name: Build & Deploy to Beget (dobrodarom.ru)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build frontend
+        working-directory: artifacts/dobro-darom
+        run: node_modules/.bin/vite build --config vite.config.ts
+        env:
+          NODE_ENV: production
+          PORT: '3000'
+          BASE_PATH: '/'
+
+      - name: Create .htaccess in dist
+        run: |
+          cat > artifacts/dobro-darom/dist/public/.htaccess << 'HTACCESS'
+          AddDefaultCharset UTF-8
+          AddType application/javascript .js .mjs
+          AddType text/css .css
+          AddType image/svg+xml .svg
+          AddType image/webp .webp
+          AddType font/woff2 .woff2
+
+          Header always set X-Content-Type-Options "nosniff"
+          Header always set X-Frame-Options "SAMEORIGIN"
+          Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+          <FilesMatch "\.(js|css|woff2|jpg|jpeg|png|svg|webp|gif|ico)$">
+          Header set Cache-Control "public, max-age=31536000, immutable"
+          </FilesMatch>
+          <FilesMatch "^index\.html$">
+          Header set Cache-Control "no-cache, no-store, must-revalidate"
+          </FilesMatch>
+
+          <IfModule mod_deflate.c>
+          AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+          </IfModule>
+
+          <IfModule mod_rewrite.c>
+          RewriteEngine On
+          RewriteBase /
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule ^ index.html [L]
+          </IfModule>
+          HTACCESS
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.BEGET_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 22 -H "${{ secrets.BEGET_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Package dist
+        run: |
+          cd artifacts/dobro-darom/dist/public
+          tar -czf /tmp/site.tar.gz .
+
+      - name: Upload archive via scp
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -P 22 \
+            /tmp/site.tar.gz \
+            "${{ secrets.BEGET_USERNAME }}@${{ secrets.BEGET_HOST }}:/tmp/site.tar.gz"
+
+      - name: Deploy on server via SSH
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -p 22 \
+            "${{ secrets.BEGET_USERNAME }}@${{ secrets.BEGET_HOST }}" << 'REMOTE'
+          set -e
+          DEPLOY_PATH="${{ secrets.BEGET_DEPLOY_PATH }}"
+          mkdir -p "$DEPLOY_PATH"
+          find "$DEPLOY_PATH" -mindepth 1 -not -name '.*' -delete 2>/dev/null || true
+          tar -xzf /tmp/site.tar.gz -C "$DEPLOY_PATH"
+          rm -f /tmp/site.tar.gz
+          echo "Deploy complete: $(ls $DEPLOY_PATH | wc -l) files"
+          REMOTE
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
